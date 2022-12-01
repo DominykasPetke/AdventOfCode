@@ -1,0 +1,29 @@
+0-4: check if proper bitwise OPs
+5  : reg_1 = 0
+{
+    6  : reg_5 = reg_1 | 65536
+    7  : reg_1 = 8586263
+    while(1) {
+        8  : reg_2 = reg_5 & 255
+        9  : reg_1 += reg_2
+        10 : reg_1 = reg_1 & 16777215
+        11 : reg_1 *= 65899
+        12 : reg_1 = reg_1 & 16777215 // = 14535837
+        13 : if (256 > reg_5)
+            {
+                28: if (reg_1 == reg_0)  // part 1: 5970144 (first possible instance)
+                {WIN}                    // part 2 (possibilities): 3580534, 
+                30: seti 5 4 4
+            }
+            else
+            {                                    // 65536 // 2nd run: 256
+                for (17: reg_2 = 0; inv 22: reg_3 <= reg_5; 24: reg_2++) {
+                    18: reg_3 = reg_2 + 1;
+                    19: reg_3 *= 256
+                }
+
+                26: reg_5 = reg_2 // 256 // 2nd run: 1
+                27: seti 7 8 4
+            }
+    }
+}
