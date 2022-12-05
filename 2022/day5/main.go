@@ -71,7 +71,7 @@ func part1() {
 				stacks[to] = append(stacks[to], x)
 			}
 		} else {
-			for i := 0; i <= (len(line)-1)/4; i++ {
+			for i := 0; i < (len(line)+1)/4; i++ {
 				if line[i*4+1] >= 65 && line[i*4+1] <= 90 {
 					stacks[i] = append(stacks[i], line[i*4+1])
 				}
@@ -141,7 +141,7 @@ func part2() {
 
 			stacks[to] = append(stacks[to], x...)
 		} else {
-			for i := 0; i <= (len(line)-1)/4; i++ {
+			for i := 0; i < (len(line)+1)/4; i++ {
 				if line[i*4+1] >= 65 && line[i*4+1] <= 90 {
 					stacks[i] = append(stacks[i], line[i*4+1])
 				}
