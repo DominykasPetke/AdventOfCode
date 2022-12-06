@@ -41,32 +41,32 @@ int how_many_reach_cube(const Cube &cube, const std::vector<Nanobot> &bots)
 {
     return std::count_if(bots.begin(), bots.end(), [&cube](const Nanobot &bot)
                          {
-                             if (bot.x + bot.r >= cube.minX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             if (bot.x + bot.r <= cube.maxX && bot.x + bot.r >= cube.minX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
                              {
                                  return true;
                              }
 
-                             if (bot.x - bot.r <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             if (bot.x - bot.r <= cube.maxX && bot.x - bot.r <= cube.minX &&  bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
                              {
                                  return true;
                              }
 
-                             if (bot.y + bot.r >= cube.minY && bot.x >= cube.minX && bot.x <= cube.maxX && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             if (bot.y + bot.r >= cube.minY && bot.y + bot.r >= cube.maxY && bot.x >= cube.minX && bot.x <= cube.maxX && bot.z >= cube.minZ && bot.z <= cube.maxZ)
                              {
                                  return true;
                              }
 
-                             if (bot.y - bot.r <= cube.maxY && bot.x >= cube.minX && bot.x <= cube.maxX && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             if (bot.y - bot.r <= cube.maxY && bot.y - bot.r <= cube.minY && bot.x >= cube.minX && bot.x <= cube.maxX && bot.z >= cube.minZ && bot.z <= cube.maxZ)
                              {
                                  return true;
                              }
                              
-                             if (bot.z + bot.r >= cube.minZ && bot.x >= cube.minX && bot.x <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY)
+                             if (bot.z + bot.r >= cube.minZ && bot.z + bot.r >= cube.maxZ && bot.x >= cube.minX && bot.x <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY)
                              {
                                  return true;
                              }
 
-                             if (bot.z - bot.r <= cube.maxZ && bot.x >= cube.minX && bot.x <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY)
+                             if (bot.z - bot.r <= cube.maxZ && bot.z - bot.r <= cube.minZ && bot.x >= cube.minX && bot.x <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY)
                              {
                                  return true;
                              }
