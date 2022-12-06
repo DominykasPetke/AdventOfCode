@@ -71,9 +71,9 @@ int how_many_reach_cube(const Cube &cube, const std::vector<Nanobot> &bots)
                                  return true;
                              }
 
-                             if ((std::min(bot.x -cube.minX, bot.x - cube.maxX) + 
-                             std::min(bot.y -cube.minY, bot.y - cube.maxY) + 
-                             std::min(bot.z -cube.minZ, bot.z - cube.maxZ)) < bot.r) {
+                             if ((std::min(std::abs(bot.x -cube.minX), std::abs(bot.x - cube.maxX)) + 
+                             std::min(std::abs(bot.y -cube.minY), std::abs(bot.y - cube.maxY)) + 
+                             std::min(std::abs(bot.z -cube.minZ), std::abs(bot.z - cube.maxZ))) <= bot.r) {
                                 return true;
                              }
 
@@ -85,7 +85,7 @@ int main()
     std::vector<Nanobot> bots;
 
     { // input
-        std::ifstream in("input_t");
+        std::ifstream in("input");
 
         std::string line;
 
@@ -144,41 +144,100 @@ int main()
 
         if (top.cube.maxX == top.cube.minX && top.cube.maxY == top.cube.minY && top.cube.maxZ == top.cube.minZ)
         {
-            std::cout << top.count << '\n';
+            std::cout << top.cube.minX + top.cube.minY + top.cube.minZ << '\n';
+
             return 0;
         }
 
         // divide into 8
-
         int midX = (top.cube.minX + top.cube.maxX) / 2;
         int midY = (top.cube.minY + top.cube.maxY) / 2;
         int midZ = (top.cube.minZ + top.cube.maxZ) / 2;
 
         Cube cube = {top.cube.minX, top.cube.minY, top.cube.minZ, midX, midY, midZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+        int count = how_many_reach_cube(cube, bots);
 
-        cube = {top.cube.minX, top.cube.minY, midZ, midX, midY, top.cube.maxZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+        if (count > 0)
+        {
+            p_queue.push(QueueElement{cube, count});
+        }
 
-        cube = {top.cube.minX, midY, top.cube.minZ, midX, top.cube.maxY, midZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+        if (midZ != top.cube.maxZ)
+        {
+            cube = {top.cube.minX, top.cube.minY, midZ + 1, midX, midY, top.cube.maxZ};
+            count = how_many_reach_cube(cube, bots);
 
-        cube = {top.cube.minX, midY, midZ, midX, top.cube.maxY, top.cube.maxZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
 
-        cube = {midX, top.cube.minY, top.cube.minZ, top.cube.maxX, midY, midZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+        if (midY != top.cube.maxY)
+        {
+            cube = {top.cube.minX, midY + 1, top.cube.minZ, midX, top.cube.maxY, midZ};
+            count = how_many_reach_cube(cube, bots);
 
-        cube = {midX, top.cube.minY, midZ, top.cube.maxX, midY, top.cube.maxZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
 
-        cube = {midX, midY, top.cube.minZ, top.cube.maxX, top.cube.maxY, midZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+        if (midY != top.cube.maxY && midZ != top.cube.maxZ)
+        {
+            cube = {top.cube.minX, midY + 1, midZ + 1, midX, top.cube.maxY, top.cube.maxZ};
+            count = how_many_reach_cube(cube, bots);
 
-        cube = {midX, midY, midZ, top.cube.maxX, top.cube.maxY, top.cube.maxZ};
-        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
 
-        std::cout << "a\n";
+        if (midX != top.cube.maxX)
+        {
+            cube = {midX + 1, top.cube.minY, top.cube.minZ, top.cube.maxX, midY, midZ};
+            count = how_many_reach_cube(cube, bots);
+
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
+
+        if (midX != top.cube.maxX && midZ != top.cube.maxZ)
+        {
+            cube = {midX + 1, top.cube.minY, midZ + 1, top.cube.maxX, midY, top.cube.maxZ};
+            count = how_many_reach_cube(cube, bots);
+
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
+
+        if (midX != top.cube.maxX && midY != top.cube.maxY)
+        {
+            cube = {midX + 1, midY + 1, top.cube.minZ, top.cube.maxX, top.cube.maxY, midZ};
+            count = how_many_reach_cube(cube, bots);
+
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
+
+        if (midX != top.cube.maxX && midY != top.cube.maxY && midZ != top.cube.maxZ)
+        {
+            cube = {midX + 1, midY + 1, midZ + 1, top.cube.maxX, top.cube.maxY, top.cube.maxZ};
+            count = how_many_reach_cube(cube, bots);
+
+            if (count > 0)
+            {
+                p_queue.push(QueueElement{cube, count});
+            }
+        }
     }
 
     return 0;
