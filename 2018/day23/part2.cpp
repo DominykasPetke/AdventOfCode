@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <cmath>
+#include <queue>
 
 struct Nanobot
 {
@@ -14,13 +14,70 @@ struct Cube
     int minX, minY, minZ, maxX, maxY, maxZ;
 };
 
-bool isIn(Cube c, Nanobot n)
+struct QueueElement
 {
-    int dx = std::max(c.minX - n.x, std::max(0, n.x - c.maxX));
-    int dy = std::max(c.minY - n.y, std::max(0, n.y - c.maxY));
-    int dz = std::max(c.minZ - n.z, std::max(0, n.z - c.maxZ));
+    Cube cube;
+    int count;
 
-    return dx + dy + dz < n.r;
+    bool operator<(const QueueElement &other) const
+    {
+        if (count == other.count)
+        {
+            return std::min(std::abs(cube.minX), std::abs(cube.maxX)) +
+                       std::min(std::abs(cube.minY), std::abs(cube.maxY)) +
+                       std::min(std::abs(cube.minZ), std::abs(cube.maxZ)) >
+                   std::min(std::abs(other.cube.minX), std::abs(other.cube.maxX)) +
+                       std::min(std::abs(other.cube.minY), std::abs(other.cube.maxY)) +
+                       std::min(std::abs(other.cube.minZ), std::abs(other.cube.maxZ));
+        }
+        else
+        {
+            return count < other.count;
+        }
+    }
+};
+
+int how_many_reach_cube(const Cube &cube, const std::vector<Nanobot> &bots)
+{
+    return std::count_if(bots.begin(), bots.end(), [&cube](const Nanobot &bot)
+                         {
+                             if (bot.x + bot.r >= cube.minX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             {
+                                 return true;
+                             }
+
+                             if (bot.x - bot.r <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             {
+                                 return true;
+                             }
+
+                             if (bot.y + bot.r >= cube.minY && bot.x >= cube.minX && bot.x <= cube.maxX && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             {
+                                 return true;
+                             }
+
+                             if (bot.y - bot.r <= cube.maxY && bot.x >= cube.minX && bot.x <= cube.maxX && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             {
+                                 return true;
+                             }
+                             
+                             if (bot.z + bot.r >= cube.minZ && bot.x >= cube.minX && bot.x <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY)
+                             {
+                                 return true;
+                             }
+
+                             if (bot.z - bot.r <= cube.maxZ && bot.x >= cube.minX && bot.x <= cube.maxX && bot.y >= cube.minY && bot.y <= cube.maxY)
+                             {
+                                 return true;
+                             }
+
+                             if ((std::min(bot.x -cube.minX, bot.x - cube.maxX) + 
+                             std::min(bot.y -cube.minY, bot.y - cube.maxY) + 
+                             std::min(bot.z -cube.minZ, bot.z - cube.maxZ)) < bot.r) {
+                                return true;
+                             }
+
+                             return false; });
 }
 
 int main()
@@ -28,7 +85,7 @@ int main()
     std::vector<Nanobot> bots;
 
     { // input
-        std::ifstream in("input");
+        std::ifstream in("input_t");
 
         std::string line;
 
@@ -57,86 +114,72 @@ int main()
         }
     }
 
-    Cube best = {std::max_element(bots.begin(), bots.end(), [](Nanobot const &t, Nanobot const &f) { return t.x > f.x; })->x,
-                 std::max_element(bots.begin(), bots.end(), [](Nanobot const &t, Nanobot const &f) { return t.y > f.y; })->y,
-                 std::max_element(bots.begin(), bots.end(), [](Nanobot const &t, Nanobot const &f) { return t.z > f.z; })->z,
-                 std::max_element(bots.begin(), bots.end(), [](Nanobot const &t, Nanobot const &f) { return t.x < f.x; })->x,
-                 std::max_element(bots.begin(), bots.end(), [](Nanobot const &t, Nanobot const &f) { return t.y < f.y; })->y,
-                 std::max_element(bots.begin(), bots.end(), [](Nanobot const &t, Nanobot const &f) { return t.z < f.z; })->z};
+    Cube best = {std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+                                  { return t.x > f.x; })
+                     ->x,
+                 std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+                                  { return t.y > f.y; })
+                     ->y,
+                 std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+                                  { return t.z > f.z; })
+                     ->z,
+                 std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+                                  { return t.x < f.x; })
+                     ->x,
+                 std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+                                  { return t.y < f.y; })
+                     ->y,
+                 std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+                                  { return t.z < f.z; })
+                     ->z};
 
-    Cube a = best;
-    int countA = 0;
+    std::priority_queue<QueueElement> p_queue;
 
-    for (auto const &i : bots)
+    p_queue.push(QueueElement{best, how_many_reach_cube(best, bots)});
+
+    while (!p_queue.empty())
     {
-        if (isIn(a, i))
-            countA++;
+        QueueElement top = p_queue.top();
+        p_queue.pop();
+
+        if (top.cube.maxX == top.cube.minX && top.cube.maxY == top.cube.minY && top.cube.maxZ == top.cube.minZ)
+        {
+            std::cout << top.count << '\n';
+            return 0;
+        }
+
+        // divide into 8
+
+        int midX = (top.cube.minX + top.cube.maxX) / 2;
+        int midY = (top.cube.minY + top.cube.maxY) / 2;
+        int midZ = (top.cube.minZ + top.cube.maxZ) / 2;
+
+        Cube cube = {top.cube.minX, top.cube.minY, top.cube.minZ, midX, midY, midZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {top.cube.minX, top.cube.minY, midZ, midX, midY, top.cube.maxZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {top.cube.minX, midY, top.cube.minZ, midX, top.cube.maxY, midZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {top.cube.minX, midY, midZ, midX, top.cube.maxY, top.cube.maxZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {midX, top.cube.minY, top.cube.minZ, top.cube.maxX, midY, midZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {midX, top.cube.minY, midZ, top.cube.maxX, midY, top.cube.maxZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {midX, midY, top.cube.minZ, top.cube.maxX, top.cube.maxY, midZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        cube = {midX, midY, midZ, top.cube.maxX, top.cube.maxY, top.cube.maxZ};
+        p_queue.push(QueueElement{cube, how_many_reach_cube(cube, bots)});
+
+        std::cout << "a\n";
     }
-
-    //std::cout << '(' << a.minX << ',' << a.minY << ',' << a.minZ << "), (" << a.maxX << ',' << a.maxY << ',' << a.maxZ << "): " << countA << '\n';
-
-    while (best.maxX - best.minX > 250)
-    {
-        int halfX = best.minX + (best.maxX - best.minX) / 2,
-            halfY = best.minY + (best.maxY - best.minY) / 2,
-            halfZ = best.minZ + (best.maxZ - best.minZ) / 2;
-
-        std::vector<Cube> kubai = {{best.minX, best.minY, best.minZ, halfX, halfY, halfZ},
-                                   {halfX + 1, best.minY, best.minZ, best.maxX, halfY, halfZ},
-                                   {best.minX, halfY + 1, best.minZ, halfX, best.maxY, halfZ},
-                                   {best.minX, best.minY, halfZ + 1, halfX, halfY, best.maxZ},
-                                   {halfX + 1, halfY + 1, best.minZ, best.maxX, best.maxY, halfZ},
-                                   {halfX + 1, best.minY, halfZ + 1, best.maxX, halfY, best.maxZ},
-                                   {best.minX, halfY + 1, halfZ + 1, halfX, best.maxY, best.maxZ},
-                                   {halfX + 1, halfY + 1, halfZ + 1, best.maxX, best.maxY, best.maxZ}};
-
-        best = *(std::max_element(kubai.begin(), kubai.end(), [&bots](Cube const &a, Cube const &b) {
-            int countA = 0;
-            int countB = 0;
-
-            for (auto const &i : bots)
-            {
-                if (isIn(a, i))
-                    countA++;
-                if (isIn(b, i))
-                    countB++;
-            }
-
-            //std::cout << '(' << a.minX << ',' << a.minY << ',' << a.minZ << "), (" << a.maxX << ',' << a.maxY << ',' << a.maxZ << "): " << countA << '\n';
-            //std::cout << '(' << b.minX << ',' << b.minY << ',' << b.minZ << "), (" << b.maxX << ',' << b.maxY << ',' << b.maxZ << "): " << countB << '\n';
-
-            return countA < countB;
-        }));
-    }
-
-    int dist = INT32_MAX; // r=distance
-    int count = 0;
-
-    for (int x = best.minX; x <= best.maxX; x++)
-        for (int y = best.minY; y <= best.maxY; y++)
-            for (int z = best.minZ; z <= best.maxZ; z++)
-            {
-                int c = 0;
-                for (auto i : bots)
-                {
-                    int dx = i.x - x;
-                    int dy = i.y - y;
-                    int dz = i.z - z;
-
-                    if (std::abs(dx) + std::abs(dy) + std::abs(dz) < i.r)
-                        c++;
-                }
-
-                if (c > count)
-                {
-                    count = c;
-                    dist = std::abs(x) + std::abs(y) + std::abs(z);
-                }
-                else if (int newd = std::abs(x) + std::abs(y) + std::abs(z); c == count && newd < dist)
-                    dist = newd;
-            }
-
-    std::cout << dist << '\n';
 
     return 0;
 }
