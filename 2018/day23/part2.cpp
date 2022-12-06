@@ -41,6 +41,11 @@ int how_many_reach_cube(const Cube &cube, const std::vector<Nanobot> &bots)
 {
     return std::count_if(bots.begin(), bots.end(), [&cube](const Nanobot &bot)
                          {
+                             if (bot.x <= cube.maxX && bot.x >= cube.minX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
+                             {
+                                 return true;
+                             }
+
                              if (bot.x + bot.r <= cube.maxX && bot.x + bot.r >= cube.minX && bot.y >= cube.minY && bot.y <= cube.maxY && bot.z >= cube.minZ && bot.z <= cube.maxZ)
                              {
                                  return true;
@@ -71,9 +76,9 @@ int how_many_reach_cube(const Cube &cube, const std::vector<Nanobot> &bots)
                                  return true;
                              }
 
-                             if ((std::min(std::abs(bot.x -cube.minX), std::abs(bot.x - cube.maxX)) + 
-                             std::min(std::abs(bot.y -cube.minY), std::abs(bot.y - cube.maxY)) + 
-                             std::min(std::abs(bot.z -cube.minZ), std::abs(bot.z - cube.maxZ))) <= bot.r) {
+                             if (std::min(std::abs(bot.x - cube.minX), std::abs(bot.x - cube.maxX)) + 
+                             std::min(std::abs(bot.y - cube.minY), std::abs(bot.y - cube.maxY)) + 
+                             std::min(std::abs(bot.z - cube.minZ), std::abs(bot.z - cube.maxZ)) <= bot.r) {
                                 return true;
                              }
 
@@ -114,7 +119,7 @@ int main()
         }
     }
 
-    Cube best = {std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
+    Cube max = {std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
                                   { return t.x > f.x; })
                      ->x,
                  std::max_element(bots.begin(), bots.end(), [](const Nanobot &t, const Nanobot &f)
@@ -135,14 +140,14 @@ int main()
 
     std::priority_queue<QueueElement> p_queue;
 
-    p_queue.push(QueueElement{best, how_many_reach_cube(best, bots)});
+    p_queue.push(QueueElement{max, how_many_reach_cube(max, bots)});
 
     while (!p_queue.empty())
     {
         QueueElement top = p_queue.top();
         p_queue.pop();
 
-        if (top.cube.maxX == top.cube.minX && top.cube.maxY == top.cube.minY && top.cube.maxZ == top.cube.minZ)
+        if (top.cube.minX == top.cube.maxX && top.cube.minY == top.cube.maxY && top.cube.minZ == top.cube.maxZ)
         {
             std::cout << top.cube.minX + top.cube.minY + top.cube.minZ << '\n';
 
