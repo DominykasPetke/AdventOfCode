@@ -95,7 +95,7 @@ func part2() {
 		if diff <= 1 {
 			output += "#"
 		} else {
-			output += "."
+			output += " "
 		}
 
 		if cycleCount%40 == 39 {
