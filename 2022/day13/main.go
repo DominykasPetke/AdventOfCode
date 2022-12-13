@@ -130,8 +130,8 @@ func part1() {
 		regex, regexError := regexp.Compile(`(\n\n|\n$)`)
 
 		if regexError != nil {
-			fmt.Println(err)
 			err = regexError
+			fmt.Println(err)
 		}
 
 		loc := regex.FindIndex(data)
